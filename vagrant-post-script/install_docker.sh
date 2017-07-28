@@ -2,6 +2,8 @@
 
 sudo dpkg -l | grep docker && { echo "Docker installed, exiting"; exit; }
 
+echo "###################     Installing docker"
+
 sudo apt-get update
 
 sudo apt-get install -y \
@@ -20,5 +22,7 @@ sudo add-apt-repository \
    stable"
 
 sudo apt-get update
-sudo apt-get install -y docker-ce=17.06.0~ce-0~ubuntu-xenial
+sudo apt-get install -y docker-ce=17.06.0~ce-0~ubuntu || { echo "Installation error, exiting"; exit; }
+
+echo "###################     Installation complete"
 
