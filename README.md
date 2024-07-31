@@ -4,4 +4,14 @@
 Remember to set dnsmasq.
 
 ## TODOS
-- write the todos
+- [ x ] write the todos
+- [ x ] add the traefik reverse proxy
+- [ ] add the ssl from mkcert to traefik folder in start.sh
+- [ ] add the personal dotfiles instead of the bashrc
+
+### Fixes
+- [ ] vmware having issues 
+```
+blc.dev: dos2unix: Failed to change the owner and group of temporary output file /vagrant/scripts-vagrant_provision/d2utmpiTv8Su: Operation not permitted
+blc.dev: dos2unix: problems converting file /vagrant/scripts-vagrant_provision/bashrc
+    ```

@@ -44,6 +44,7 @@ Vagrant.configure("2") do |config|
   config.vm.provision "docker" do |d|
     d.pull_images "tianon/true"
     d.pull_images "swaggerapi/swagger-editor"
+    d.pull_images "traefik:v2.11.0"
     #d.pull_images "postgres:latest"
     #d.pull_images "fenglc/pgadmin4"
     #d.pull_images "nginx:alpine"
@@ -51,7 +52,7 @@ Vagrant.configure("2") do |config|
   end
 
   #provision docker orchestration (set to always run)
-  #config.vm.provision "shell", path: "scripts-vagrant_provision/orchestrate_docker.sh", run: "always"
+  config.vm.provision "shell", path: "scripts-vagrant_provision/run-traefik.sh", run: "always"
 
   config.vm.post_up_message = "Setup is complete, open your browser to http://#{machine_name} (did you configure /etc/hosts via start.sh, or manually?)"
 

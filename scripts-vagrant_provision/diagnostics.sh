@@ -14,10 +14,10 @@ function generate_row {
 
 # Start of the table
 echo "+-----------------+-----------------+"
-generate_row "Docker version" "$(docker --version | awk '{print $3}')"
-# generate_row "Docker server" "$(docker version -f json | jq .Server.Version)"
-# generate_row "Docker client" "$(docker version -f json | jq .Client.Version)"
-generate_row "Docker compose" "$(docker-compose --version | awk '{print $3}')"
+# generate_row "Docker version" "$(docker --version | awk '{print $3}')"
+generate_row "Docker server" "$(docker version -f json | jq .Server.Version)"
+generate_row "Docker client" "$(docker version -f json | jq .Client.Version)"
+generate_row "Docker compose" "$(docker-compose --version | awk '{print $4}')"
 generate_row "Node" "$(node -v)"
 generate_row "NPM" "$(npm -v)"
 generate_row "Python" "$(python3 --version | sed 's/Python //' 2>&1)"
