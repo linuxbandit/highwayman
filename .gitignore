@@ -1,5 +1,5 @@
 .vagrant/
 .env
-acme.json
+certs
 current-config.yml
 gateways/docker/traefik/logs

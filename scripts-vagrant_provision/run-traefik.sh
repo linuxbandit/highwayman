@@ -4,16 +4,16 @@
 #shellcheck disable=SC2046
 export $(grep -v '^#' /vagrant/.env | xargs -d '\n')
 
-# check first time if acme.json exists
-touch /vagrant/gateways/docker/certs/acme.json
-
 # permissions fix on the folder
 DIRECTORY=/vagrant/gateways/docker/traefik/logs
 if [ ! -d "${DIRECTORY}" ]; then
-  mkdir "${DIRECTORY}"
+  mkdir -p "${DIRECTORY}"
   chown vagrant:vagrant "${DIRECTORY}" 
   chmod 644 "${DIRECTORY}" 
 fi
+
+# make sure acme.json exists as file before first run
+touch /vagrant/gateways/docker/certs/acme.json
 
 cd /vagrant/gateways/docker || exit 1
 

@@ -6,7 +6,7 @@ Remember to set dnsmasq.
 ## TODOS
 - [ x ] write the todos
 - [ x ] add the traefik reverse proxy
-- [ ] add the ssl from mkcert to traefik folder in start.sh
+- [ x ] add the ssl from mkcert to traefik folder in start.sh
 - [ ] add the personal dotfiles instead of the bashrc
 
 ### Fixes

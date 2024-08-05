@@ -57,9 +57,9 @@ Vagrant.configure("2") do |config|
   config.vm.post_up_message = "Setup is complete, open your browser to http://#{machine_name} (did you configure /etc/hosts via start.sh, or manually?)"
 
   ## Deprovisioning scripts ##
-  config.trigger.before :destroy do |trigger|
-    trigger.warn = "Removing .init to avoid Docker network mismatch"
-    trigger.run_remote = { inline: "rm /vagrant/.init 2>/dev/null || echo 'file already gone'" }
-  end
+  # config.trigger.before :destroy do |trigger|
+  #   trigger.warn = "Removing .init to avoid Docker network mismatch"
+  #   trigger.run_remote = { inline: "rm /vagrant/.init 2>/dev/null || echo 'file already gone'" }
+  # end
 
 end
