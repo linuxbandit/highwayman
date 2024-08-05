@@ -1,5 +1,13 @@
 # A vagrant vm to develop stuff on
 
+provider: VMware
+box: bento/ubuntu-22.04
+
+Specific versions of the box can be found on the `start.sh` script
+
+## Dev stuff
+Specific versions of the dev stuff (node/python) can be found on the Ansible values file `scripts-vagrant_provision/local.yml`
+
 ## Notes
 Remember to set dnsmasq.
 
