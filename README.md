@@ -16,6 +16,7 @@ Remember to set dnsmasq.
 - [ x ] add the traefik reverse proxy
 - [ x ] add the ssl from mkcert to traefik folder in start.sh
 - [ ] add the personal dotfiles instead of the bashrc
+- [ ] add a modular way to plug components and have them bootstrapped (mostly like dharma) 
 
 ### Fixes
 - [ ] vmware having issues 

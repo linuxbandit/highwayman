@@ -1,22 +1,30 @@
 
+# volumes:
+#    shared_logs:
+#        driver: "local"
+#    upload:
+
 services:
 
 ### HTTP gateway    #######################################
 ### Proxy container #######################################
 
   traefik:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.api.entrypoints=websecure"
+      - "traefik.http.routers.api.tls=true"
+      - "traefik.http.routers.api.rule=Host(`${SUBDOMAIN_TRAEFIK}${BASE_URL}`)"
+      - "traefik.http.routers.api.service=api@internal"
+
+      - "traefik.http.routers.api.middlewares=traefikauth"
+      - "traefik.http.middlewares.traefikauth.basicauth.users=admin:${PW_TRAEFIK}"
+
+      # Defined here and used in all microservices
+      # - "traefik.http.middlewares.metricsauth.basicauth.users=admin:${METRICS_CREDENTIALS}"
+
     image: traefik:v2.11.0
     restart: always
-    ports:
-      - 80:80
-      - 443:443
-      - 8080:8080
-    healthcheck:
-      test: wget --quiet --tries=1 --spider http://localhost:8080 || exit 1
-      interval: 10s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       # below: we have to mount it to preserve it on the host, so no secrets
@@ -27,8 +35,20 @@ services:
       # only for dev, but we keep it in this file for now
       - ./traefik/dynamic_conf_mkcert.yml:/etc/traefik/dynamic_conf_mkcert.yml
       # - shared_logs:/var/log/traefik/
-#        networks:
-#          - management
+    # networks:
+    #   - management
+    ports:
+      - 80:80
+      - 443:443
+      - 8080:8080
+
+    healthcheck:
+      test: wget --quiet --tries=1 --spider http://localhost:8080 || exit 1
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    
     command:
       - "--api.insecure=true"
       - "--api.dashboard=true"
@@ -71,22 +91,3 @@ services:
       # Use the following line to configure Traefik to use the manually provided certificates
       # only for dev, but we keep it in this file for now
       - "--providers.file.filename=/etc/traefik/dynamic_conf_mkcert.yml" #FIXME see if it overrides cors.yml somehow
-
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.api.entrypoints=websecure"
-      - "traefik.http.routers.api.tls=true"
-      - "traefik.http.routers.api.rule=Host(`${SUBDOMAIN_TRAEFIK}${BASE_URL}`)"
-      - "traefik.http.routers.api.service=api@internal"
-
-      - "traefik.http.routers.api.middlewares=traefikauth"
-      - "traefik.http.middlewares.traefikauth.basicauth.users=admin:${PW_TRAEFIK}"
-
-      # Defined here and used in all microservices
-      # - "traefik.http.middlewares.metricsauth.basicauth.users=admin:${METRICS_CREDENTIALS}"
-
-
-# volumes:
-#    shared_logs:
-#        driver: "local"
-#    upload:
