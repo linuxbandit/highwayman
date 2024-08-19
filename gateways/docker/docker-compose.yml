@@ -16,25 +16,28 @@ services:
       - "traefik.http.routers.api.tls=true"
       - "traefik.http.routers.api.rule=Host(`${SUBDOMAIN_TRAEFIK}${BASE_URL}`)"
       - "traefik.http.routers.api.service=api@internal"
-
+      - "traefik.http.services.api.loadbalancer.server.port=8080"
       - "traefik.http.routers.api.middlewares=traefikauth"
       - "traefik.http.middlewares.traefikauth.basicauth.users=admin:${PW_TRAEFIK}"
 
+      # - "traefik.http.routers.metrics.rule=Path(`/metrics`)"
+      # - "traefik.http.routers.metrics.entrypoints=metrics"
+      # - "traefik.http.services.metrics.loadbalancer.server.port=8082"
       # Defined here and used in all microservices
       # - "traefik.http.middlewares.metricsauth.basicauth.users=admin:${METRICS_CREDENTIALS}"
 
     image: traefik:v2.11.0
     restart: always
+
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      # below: we have to mount it to preserve it on the host, so no secrets
-      - ./certs/acme.json:/etc/acme.json
-      - ./certs:/certs
-      - ./traefik/cors.yml:/etc/traefik/cors.yml
-      - ./traefik/logs:/var/log/
-      # only for dev, but we keep it in this file for now
       - ./traefik/dynamic_conf_mkcert.yml:/etc/traefik/dynamic_conf_mkcert.yml
+      # below: we have to mount it to preserve it on the host, so no secrets
+      - ./certs:/certs
+      - ./certs/acme.json:/etc/acme.json
+      - ./traefik/cors.yml:/etc/traefik/cors.yml
       # - shared_logs:/var/log/traefik/
+      - ./traefik/logs:/var/log/
     # networks:
     #   - management
     ports:
@@ -48,13 +51,15 @@ services:
       timeout: 10s
       retries: 3
       start_period: 10s
-    
+
     command:
       - "--api.insecure=true"
       - "--api.dashboard=true"
+      #- "--api.debug=true"
       - "--metrics.prometheus=true"
       - "--metrics.prometheus.entrypoint=metrics"
       - "--log.level=INFO"
+
       - "--log.filePath=/var/log/traefik.log"
       - "--accesslog=true"
       - "--accesslog.filepath=/var/log/access.log"
@@ -62,32 +67,19 @@ services:
       - "--providers.docker=true"
       - "--providers.docker.swarmMode=false"
       - "--providers.docker.exposedbydefault=false"
+      #- "--providers.docker.network=management"
 
-      #for prometheus, http, https
+      #for prometheus
       - "--entrypoints.metrics.address=:8082"
+      #for http + redirection
       - "--entrypoints.web.address=:80"
       - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
       - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+      #for https
       - "--entrypoints.websecure.address=:443"
       - "--entrypoints.websecure.http.tls=true"
-      - "--entrypoints.websecure.http.tls.certResolver=myresolver"
-      - "--entrypoints.websecure.http.tls.domains[0].main=${BASE_URL}"
-      - "--entrypoints.websecure.http.tls.domains[0].sans=*.${BASE_URL}"
-
-      #for CORS
-      - "--providers.file.filename=/etc/traefik/cors.yml"
-
-      #for HTTPS automatic
-      - "--certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web"
-      - "--certificatesresolvers.myresolver.acme.email=${DEVS_EMAIL}@aegee.eu"
-      - "--certificatesresolvers.myresolver.acme.storage=acme.json"
-      # For testing: staging certs of LE
-      #- "--certificatesresolvers.myresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
-
-      # AND apparently -according to traefik AWFUL docs- for EVERY route we have to define which resolver?!
-      # non é cosi che ho fatto in rockerduck, dio cane
-      # - traefik.http.routers.blog.tls.certresolver=myresolver
-
-      # Use the following line to configure Traefik to use the manually provided certificates
-      # only for dev, but we keep it in this file for now
-      - "--providers.file.filename=/etc/traefik/dynamic_conf_mkcert.yml" #FIXME see if it overrides cors.yml somehow
+      #for https using the manually provided certificates
+      - "--providers.file.filename=/etc/traefik/dynamic_conf_mkcert.yml"
+      
+      #for CORS --NB:there can only be ONE file provider at a time. Adding this will override HTTPS
+      #- "--providers.file.filename=/etc/traefik/cors.yml"
