@@ -1,4 +1,4 @@
-machine_name = "blc.dev"
+machine_name = "highwayman.blc"
 ip_address = "192.168.42.168"
 vm_box = "bento/ubuntu-22.04"
 
@@ -54,7 +54,7 @@ Vagrant.configure("2") do |config|
   #provision docker orchestration (set to always run)
   config.vm.provision "shell", path: "scripts-vagrant_provision/run-traefik.sh", run: "always"
 
-  config.vm.post_up_message = "Setup is complete, open your browser to http://#{machine_name} (did you configure /etc/hosts via start.sh, or manually?)"
+  config.vm.post_up_message = "Setup is complete, open your browser to http://#{machine_name} \n   (did you configure dnsmasq, or /etc/hosts via start.sh/manually?)"
 
   ## Deprovisioning scripts ##
   # config.trigger.before :destroy do |trigger|

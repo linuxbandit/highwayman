@@ -28,13 +28,16 @@ check_mkcert() {
 
   if type mkcert >/dev/null 2>&1; then
     DIRECTORY=./gateways/docker/certs
-    if [[ ! -f "${DIRECTORY}/mycert.crt" ]]; then
+    if [[ ! -f "${DIRECTORY}/${BASE_URL}.crt" ]]; then
       echo '[Start script] ##### cert files are to be generated'
       mkcert -install
       mkcert "*.${BASE_URL}"
       if [ ! -d "${DIRECTORY}" ]; then mkdir -p "${DIRECTORY}"; fi
-      mv "./_wildcard.${BASE_URL}-key.pem" "${DIRECTORY}/mycert.key"
-      mv "./_wildcard.${BASE_URL}.pem"     "${DIRECTORY}/mycert.crt"
+      mv "./_wildcard.${BASE_URL}-key.pem" "${DIRECTORY}/${BASE_URL}.key"
+      mv "./_wildcard.${BASE_URL}.pem"     "${DIRECTORY}/${BASE_URL}.crt"
+      # to keep the traefik config static, we use symlinks. This way we also retain the knowledge of the domain name in the file name
+      ln -s "${BASE_URL}.key" "${DIRECTORY}/mycert.key"
+      ln -s "${BASE_URL}.crt" "${DIRECTORY}/mycert.crt"
       echo '[Start script] ##### created cert files'
     else
       echo '[Start script] ##### cert files already good!'
@@ -50,7 +53,7 @@ check_dnsmasq() {
   local conf_file="$(brew --prefix)/etc/dnsmasq.conf"
   local domain=".${BASE_URL##*.}"
   echo 
-  grep $domain $conf_file
+  grep "${domain}" "${conf_file}"
   if [ -n "$?" ]; then
     echo "[Start script] ##### DNSmasq already good!"
   else
@@ -59,6 +62,8 @@ check_dnsmasq() {
     echo "[Start script] ##### DNSmasq not set! Do not forget to set it"
     echo "[Start script] ##### DNSmasq not set! Do not forget to set it"
     echo "[Start script] ##### DNSmasq not set! Do not forget to set it"
+    echo "[Start script] ##### DNSmasq not set, checking file /etc/hosts"
+    check_etc_hosts "192.168.42.168" "${BASE_URL}"
   fi
 
 }
@@ -75,8 +80,6 @@ fi
 #shellcheck disable=SC2046
 export $(grep -v '^#' "${DIR}/.env" | xargs -d '\n')
 
-
-check_etc_hosts "192.168.42.168" "${BASE_URL}"
 check_mkcert
 check_dnsmasq
 
