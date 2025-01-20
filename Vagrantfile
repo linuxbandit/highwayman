@@ -1,15 +1,25 @@
 machine_name = "highwayman.blc"
 ip_address = "192.168.42.168"
 vm_box = "bento/ubuntu-22.04"
+vm_mem = "1024"
 
 Vagrant.configure("2") do |config|
   #Machine name for Vagrant, and machine type
   config.vm.define machine_name
   config.vm.box = vm_box
 
-  #Machine name for virtualbox, and RAM size
+  #Provider virtualbox, set machine name and RAM size
+  config.vm.provider :virtualbox do |vb|
+    vb.customize [
+      "modifyvm", :id,
+      "--name", machine_name,
+      "--memory", vm_mem,
+    ]
+  end
+
+  #Provider vmw, set only RAM size
   config.vm.provider :vmware_desktop do |vmw|
-    vmw.vmx["memsize"] = "1024"
+    vmw.vmx["memsize"] = vm_mem
   end
 
   ## Folder configurations ##

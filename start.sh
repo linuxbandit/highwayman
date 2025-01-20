@@ -81,17 +81,27 @@ fi
 export $(grep -v '^#' "${DIR}/.env" | xargs -d '\n')
 
 check_mkcert
-check_dnsmasq
+if [[ "$(uname)" == "Darwin" ]]; then
+  check_dnsmasq
+else
+  echo "no need for DNSmasq or resolv.conf editing on remote server"
+fi
 
 TARGET_BOX_VERSION="202401.31.0"
 TARGET_BOX_DISTRO="bento/ubuntu-22.04"
 
-vagrant box list | grep "${TARGET_BOX_VERSION}" -q || vagrant box add "${TARGET_BOX_DISTRO}" --provider vmware_desktop --box-version "${TARGET_BOX_VERSION}" -c
+# Pick between "virtualbox" and "vmware_desktop"
+PROVIDER_NAME=vmware_desktop
 
-vagrant plugin list | grep vmware -q || vagrant plugin install vagrant-vmware-desktop
+vagrant box list | grep "${TARGET_BOX_VERSION}" -q || vagrant box add "${TARGET_BOX_DISTRO}" --provider "${PROVIDER_NAME}" --box-version "${TARGET_BOX_VERSION}" -c
+
+if [[ "${PROVIDER_NAME}" == "vmware_desktop" ]]; then
+  vagrant plugin list | grep vmware -q || vagrant plugin install vagrant-vmware-desktop
+else
+  vagrant plugin list | grep vbguest -q || vagrant plugin install vagrant-vbguest
+fi
+
 ansible-galaxy role install -r scripts-vagrant_provision/requirements-ansible.yml
 
 export ANSIBLE_NOCOWS=true
-vagrant up
-
-
+vagrant up --provider "${PROVIDER_NAME}"
